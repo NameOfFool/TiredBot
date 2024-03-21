@@ -1,25 +1,20 @@
 const TelegramBot = require('node-telegram-bot-api');
 const token = '6332055925:AAFK7xv_415GnnQb6WZyG5S6mrkiWw0sO40';
 const bot = new TelegramBot(token, { polling: true });
-
-getMins()
 bot.on('message', (msg) => {
   var requests = ["когда эта пара закончится", "когда конец пары?"];
   var response = getMins() + ' ' + getCase(getMins())
   if(requests.includes(msg.text.toString().toLowerCase()))
   bot.sendMessage(msg.chat.id, response); 
 });
-
 function getMins()
 {
   var currentDate = new Date()
-  currentDate = new Date('2000-01-01T' + currentDate.getHours() + ':' + currentDate.getMinutes())
-  var schelude = ['10:00:00', '11:40:00', '13:20:00', '15:30:00'].reverse()
+  var schelude = ['1000', '1140', '1320', '1530'].reverse()
   for(let i = 0; i < schelude.length-1; i++)
   {
-    let date1 = new Date('2000-01-01T'+schelude[i]).getTime()
-    console.log(currentDate.getMinutes())
-    let date2 = new Date('2000-01-01T'+schelude[i + 1]).getTime()
+    let date1 = structuredClone(currentDate).setHours(schelude[i].substring(0,2), schelude[i].substring(2,4))
+    let date2 = structuredClone(currentDate).setHours(schelude[i + 1].substring(0,2), schelude[i + 1].substring(2,4))
     if(currentDate.getTime() < date1  && currentDate.getTime() > date2)
     {
       return Math.floor(date1 - currentDate.getTime())/(1000*60)
