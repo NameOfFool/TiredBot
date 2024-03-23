@@ -3,10 +3,22 @@ require('dotenv').config()
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-bot.on('message', sendTimeMessage)
-//TODO если введено 3 сообщения градация
+let count = 0
+let buffer = ""
 
-
+bot.on('message', (msg) =>{
+  var requests = ["когда", "пара", "кончится", "?"]
+  let check = true
+  for (let word of requests){
+    if(!msg.text.toString().toLowerCase().includes(word)){
+      check = false;
+      break;
+    }
+  }
+  if(check)
+    sendTimeMessage(msg)
+})
+bot.onText(/\/left/, sendTimeMessage)
 bot.onText(/\/start/, (msg) => {
 
   bot.sendMessage(msg.chat.id, "Welcome");
@@ -17,7 +29,7 @@ bot.onText(/\/start/, (msg) => {
 function getMins()
 {
   var currentDate = new Date()
-  var schelude = ['1000', '1140', '1320', '1530'].reverse()
+  var schelude = ['1000', '1140', '1320', '1530', '1710'].reverse()
   for(let i = 0; i < schelude.length-1; i++)
   {
     let date1 = structuredClone(currentDate).setHours(schelude[i].substring(0,2), schelude[i].substring(2,4))
@@ -39,19 +51,20 @@ function getCase(a)
   else
     return 'минут' 
 }
-function sendTimeMessage(msg){
-  var requests = ["когда", "пара", "кончится", "?"]
-  let check = true
-  for (let word of requests){
-    if(msg.text.includes("/left")){
-      break
-    }
-    if(!msg.text.toString().toLowerCase().includes(word)){
-      check = false;
-      break;
-    }
-  }
+function sendTimeMessage(msg){ 
   var response = getMins() + ' ' + getCase(getMins())
-  if(check)
-    bot.sendMessage(msg.chat.id, response);
+  if(response==buffer)
+    count+=1
+  buffer = response
+  switch(count){
+  case 1:
+    response+="!"
+    break;
+  case 2:
+    response = response.toUpperCase()+"!!!"
+    count = 0;
+    buffer = ""
+    break;
+}
+  bot.sendMessage(msg.chat.id, response);
 }
